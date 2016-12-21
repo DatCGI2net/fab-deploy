@@ -1,0 +1,20 @@
+"""
+WSGI config for %(proj_name)s project.
+
+It exposes the WSGI callable as a module-level variable named ``application``.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/
+"""
+
+import os, sys
+import site
+
+base_dir = '/var/www/clients/%(client_id)s/%(website_id)s/home/%(user)s'
+site.addsitedir(os.path.join(base_dir,'.virtualenvs/%(proj_name)s/lib/python2.7/site-packages'))
+
+sys.path.append('%(proj_path)s')
+
+os.environ["DJANGO_SETTINGS_MODULE"] = "%(proj_name)s.settings"
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()

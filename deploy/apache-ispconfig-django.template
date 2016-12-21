@@ -1,0 +1,115 @@
+
+<Directory /var/www/%(domain)s>
+		AllowOverride None
+				Require all denied
+		</Directory>
+
+<VirtualHost *:80>
+
+									DocumentRoot /var/www/%(domain)s/web
+						
+		ServerName %(domain)s
+		ServerAdmin webmaster@%(domain)s
+
+		ErrorLog /var/log/ispconfig/httpd/%(domain)s/error.log
+
+		Alias /error/ "/var/www/%(domain)s/web/error/"
+		ErrorDocument 400 /error/400.html
+		ErrorDocument 401 /error/401.html
+		ErrorDocument 403 /error/403.html
+		ErrorDocument 404 /error/404.html
+		ErrorDocument 405 /error/405.html
+		ErrorDocument 500 /error/500.html
+		ErrorDocument 502 /error/502.html
+		ErrorDocument 503 /error/503.html
+
+		<IfModule mod_ssl.c>
+		</IfModule>
+
+		<Directory /var/www/%(domain)s/web>
+				# Clear PHP settings of this website
+				<FilesMatch ".+\.ph(p[345]?|t|tml)$">
+						SetHandler None
+				</FilesMatch>
+				Options +FollowSymLinks
+				AllowOverride All
+								Require all granted
+								<Files ~ '.php[s3-6]{0,1}$'>
+												Require all denied
+										</Files>
+		</Directory>
+		<Directory /var/www/clients/%(client_id)s/%(website_id)s/web>
+				# Clear PHP settings of this website
+				<FilesMatch ".+\.ph(p[345]?|t|tml)$">
+						SetHandler None
+				</FilesMatch>
+				Options +FollowSymLinks
+				AllowOverride All
+								Require all granted
+								<Files ~ '.php[s3-6]{0,1}$'>
+										Require all denied
+									</Files>
+		</Directory>
+
+
+
+		<IfModule mod_python.c>
+			<Directory /var/www/%(domain)s/web>
+				<FilesMatch "\.py$">
+					SetHandler mod_python
+				</FilesMatch>
+				PythonHandler mod_python.publisher
+				PythonDebug On
+			</Directory>
+		</IfModule>
+
+		# suexec enabled
+		<IfModule mod_suexec.c>
+			SuexecUserGroup %(website_id)s %(client_id)s
+		</IfModule>
+
+
+
+		# add support for apache mpm_itk
+		<IfModule mpm_itk_module>
+			AssignUserId %(website_id)s %(client_id)s
+		</IfModule>
+
+		<IfModule mod_dav_fs.c>
+		# Do not execute PHP files in webdav directory
+			<Directory /var/www/clients/%(client_id)s/%(website_id)s/webdav>
+				<ifModule mod_security2.c>
+					SecRuleRemoveById 960015
+					SecRuleRemoveById 960032
+				</ifModule>
+				<FilesMatch "\.ph(p3?|tml)$">
+					SetHandler None
+				</FilesMatch>
+			</Directory>
+			DavLockDB /var/www/clients/%(client_id)s/%(website_id)s/tmp/DavLock
+			# DO NOT REMOVE THE COMMENTS!
+			# IF YOU REMOVE THEM, WEBDAV WILL NOT WORK ANYMORE!
+      # WEBDAV BEGIN
+			# WEBDAV END
+		</IfModule>
+
+	###python-path=/var/www/clients/%(client_id)s/%(website_id)s/web:/var/www/clients/%(client_id)s/%(website_id)s/home/%(user)s/.envcms/lib/python2.7/site-packages
+    WSGIDaemonProcess %(domain)s
+    WSGIProcessGroup %(domain)s 
+    WSGIScriptAlias / %(proj_path)s/%(proj_name)s/wsgi.py process-group=%(domain)s
+    
+
+   Alias /static/ /var/www/clients/%(client_id)s/%(website_id)s/web/static/
+   Alias /media/ /var/www/clients/%(client_id)s/%(website_id)s/web/media/
+   
+   <Directory "%(proj_path)s/%(proj_name)s">
+   <Files wsgi.py>
+   Require all granted
+   </Files>
+   </Directory>
+
+</VirtualHost>
+
+
+
+
