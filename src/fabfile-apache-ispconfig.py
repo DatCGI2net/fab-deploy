@@ -277,7 +277,11 @@ def rsync_upload():
     excludes = ["*.pyc", "*.pyo", "*.db", ".DS_Store", ".coverage",
                 "local_settings.py", "/static", "/.git", "/.hg", "fabfile*"]
     ###local_dir = os.getcwd() + os.sep
-    local_dir = env.local_path
+    ##local_dir = env.local_path
+    local_dir = os.getcwd() + os.sep
+    if 'Win' in platform():
+        local_dir = re.sub(r'\\',r'/',local_dir)
+        local_dir = re.sub(r'([C-Z]):', r'/cygdrive/\1' ,local_dir)
     
     return rsync_project(remote_dir=env.proj_path, local_dir=local_dir,
                          exclude=excludes, extra_opts=env.extra_opts)
